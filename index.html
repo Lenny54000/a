@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Items</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        a:hover {
+            background-color: #007BFF;
+            color: white;
+        }
+        li:hover {
+            transform: translateX(10px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Liste des Items</h1>
+        <ul id="itemList">
+            <!-- Ajoute ici les items que tu veux afficher dans la liste -->
+            <!-- Par exemple : <li data-item="item1">Item 1</li> -->
+            <li data-item="Devine-le-nombre">Devine-le-nombre</li>
+            <li data-item="Images">Images</li>
+            <li data-item="Task">Task</li>
+            <li data-item="Bouton-erreur">Bouton-erreur</li>
+            <!-- Ajoute d'autres items de la même manière -->
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sélectionner tous les éléments de la liste
+            const items = document.querySelectorAll('#itemList li');
+
+            // Parcourir chaque élément et ajouter le lien
+            items.forEach(item => {
+                const itemName = item.getAttribute('data-item');
+                const link = document.createElement('a');
+                link.href = `https://lenny54000.github.io/${itemName}/`;
+                link.target = '_blank';
+                link.textContent = item.textContent;
+                item.textContent = '';
+                item.appendChild(link);
+            });
+        });
+    </script>
+</body>
+</html>
