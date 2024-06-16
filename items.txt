@@ -5,3 +5,4 @@ Devine-le-nombre
 Images
 Task
 Bouton-erreur
+Barre-de-progression
