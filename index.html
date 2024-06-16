@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste de mes projets</title>
+    <title>Liste des Items</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,37 +54,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Liste de mes projets</h1>
+        <h1>Liste des Items</h1>
         <ul id="itemList">
-            <!-- Ajoute ici les items que tu veux afficher dans la liste -->
-            <!-- Par exemple : <li data-item="item1">Item 1</li> -->
-            <li data-item="Devine-le-nombre">Devine-le-nombre</li>
-            <li data-item="Images">Images</li>
-            <li data-item="Task">Task</li>
-            <li data-item="Bouton-erreur">Bouton-erreur</li>
-            <li data-item="page-inutile">page-inutile</li>
-            <li data-item="redirection">redirection</li>
-            <li data-item="hack">hack</li>
-            <!-- Ajoute d'autres items de la même manière -->
+            <!-- Les items seront ajoutés ici par JavaScript -->
         </ul>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Sélectionner tous les éléments de la liste
-            const items = document.querySelectorAll('#itemList li');
-
-            // Parcourir chaque élément et ajouter le lien
-            items.forEach(item => {
-                const itemName = item.getAttribute('data-item');
-                const link = document.createElement('a');
-                link.href = `https://lenny54000.github.io/${itemName}/`;
-                link.target = '_blank';
-                link.textContent = item.textContent;
-                item.textContent = '';
-                item.appendChild(link);
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
