@@ -6,4 +6,3 @@ Task
 Bouton-erreur
 Barre-de-progression
 Bonjour
-feux-artifice
