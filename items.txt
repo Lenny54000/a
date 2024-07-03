@@ -7,7 +7,6 @@ Bouton-erreur
 Barre-de-progression
 Bonjour
 Citation
-nombres-premiers
 Devine-le-nombre
 Date-et-jour
 Disco
