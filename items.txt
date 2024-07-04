@@ -11,3 +11,4 @@ Devine-le-nombre
 Date-et-jour
 Disco
 Note
+Generateur-de-mot-de-passe
