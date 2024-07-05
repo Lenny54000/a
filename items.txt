@@ -12,3 +12,4 @@ Date-et-jour
 Disco
 Note
 Generateur-de-mot-de-passe
+Pierre-feuille-ciseau
