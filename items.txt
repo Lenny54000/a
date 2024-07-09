@@ -1,5 +1,6 @@
 Pokedex
 Quiz
+Generateur-de-blague
 hack
 Football-epic-moment
 redirection
