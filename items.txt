@@ -18,4 +18,5 @@ Note
 Generateur-de-mot-de-passe
 Pierre-feuille-ciseau
 Action-Verite
+Clicker
 Caca-seconde
