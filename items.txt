@@ -1,3 +1,4 @@
+ON-OFF
 Pokedex
 Quiz
 Generateur-de-blague
