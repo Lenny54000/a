@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste de mes projets GitHub Pages</title>
+  <style>
+    /* Animation du dégradé tournant avec changement de couleurs fluide */
+    @keyframes gradientAnimation {
+      0% {
+        background: linear-gradient(135deg, #ffe8d6, #ff9f9f);
+      }
+      25% {
+        background: linear-gradient(225deg, #ff9f9f, #ffe8d6);
+      }
+      50% {
+        background: linear-gradient(315deg, #ffe8d6, #ff9f9f);
+      }
+      75% {
+        background: linear-gradient(45deg, #ff9f9f, #ffe8d6);
+      }
+      100% {
+        background: linear-gradient(135deg, #ffe8d6, #ff9f9f);
+      }
+    }
+
+    body {
+      background: linear-gradient(135deg, #ffe8d6, #ff9f9f);
+      animation: gradientAnimation 10s ease infinite;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.5s ease;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    li {
+      margin-bottom: 20px;
+    }
+
+    a {
+      display: block;
+      text-decoration: none;
+      background: #007BFF;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    a:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+
+    a:active {
+      transform: scale(1);
+    }
+
+    .loading {
+      margin-top: 30px;
+      padding: 10px 0;
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mes projets GitHub Pages</h1>
+    <p class="loading" id="loadingMessage">Chargement des projets...</p>
+    <ul id="pages-list"></ul>
+  </div>
+
+  <script>
+    // Remplacez par votre nom d'utilisateur GitHub
+    const username = 'lenny54000';
+
+    // Fonction pour trier les dépôts par date de mise à jour (du plus récent au plus ancien)
+    function sortReposByDate(repos) {
+      return repos.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+    }
+
+    // Fonction pour nettoyer le nom du dépôt en remplaçant les caractères spéciaux par des tirets
+    // (Les majuscules ne sont pas modifiées pour l'affichage)
+    function cleanRepoName(name) {
+      return name.replace(/[^a-zA-Z0-9-_]/g, '-');
+    }
+
+    // Récupère la liste de tous les dépôts de l'utilisateur
+    fetch(`https://api.github.com/users/${username}/repos`)
+      .then(response => response.json())
+      .then(repos => {
+        const listElement = document.getElementById('pages-list');
+        const loadingMessage = document.getElementById('loadingMessage');
+        loadingMessage.style.display = 'none';
+
+        // Filtrer les dépôts qui ont GitHub Pages activé et exclure le dépôt principal (username.github.io)
+        const pagesRepos = repos.filter(repo => repo.has_pages && repo.name !== `${username}.github.io`);
+
+        // Trier par date de dernière modification
+        const sortedRepos = sortReposByDate(pagesRepos);
+
+        // Pour chaque dépôt, vérifier la présence d'un fichier index.html dans le répertoire racine
+        Promise.all(sortedRepos.map(repo => {
+          return fetch(`https://api.github.com/repos/${username}/${repo.name}/contents`)
+            .then(response => {
+              if (!response.ok) throw new Error('Erreur dans la récupération des contenus');
+              return response.json();
+            })
+            .then(contents => {
+              // Vérifier si l'un des fichiers est "index.html"
+              const hasIndex = contents.some(item => item.name === 'index.html');
+              return hasIndex ? repo : null;
+            })
+            .catch(error => {
+              console.error(`Erreur lors de la vérification du dépôt ${repo.name}:`, error);
+              return null;
+            });
+        }))
+        .then(validRepos => {
+          // Ne conserver que les dépôts valides (ceux avec index.html)
+          validRepos = validRepos.filter(repo => repo !== null);
+
+          // S'il n'y a aucun dépôt valide, afficher un message
+          if (validRepos.length === 0) {
+            listElement.innerHTML = '<li>Aucun projet GitHub Pages trouvé.</li>';
+            return;
+          }
+
+          // Afficher chaque dépôt
+          validRepos.forEach(repo => {
+            const cleanName = cleanRepoName(repo.name);
+            const pageURL = `https://${username}.github.io/${cleanName}`;
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = pageURL;
+            a.target = '_blank';
+            a.textContent = repo.name;
+            li.appendChild(a);
+            listElement.appendChild(li);
+          });
+        })
+        .catch(error => {
+          console.error('Erreur globale lors de la vérification des dépôts :', error);
+          listElement.innerHTML = '<li>Erreur lors du chargement des projets.</li>';
+        });
+      })
+      .catch(error => {
+        console.error('Erreur lors de la récupération des dépôts :', error);
+        document.getElementById('pages-list').innerHTML = '<li>Erreur lors du chargement des projets.</li>';
+      });
+  </script>
+</body>
+</html>
