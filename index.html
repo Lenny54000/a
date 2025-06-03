@@ -52,6 +52,15 @@
       margin-bottom: 20px;
     }
 
+    h2 {
+      color: #555;
+      font-size: 1.5rem;
+      margin: 30px 0 15px 0;
+      text-align: left;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 5px;
+    }
+
     ul {
       list-style: none;
       padding: 0;
@@ -97,7 +106,14 @@
   <div class="container">
     <h1>Mes projets GitHub Pages</h1>
     <p class="loading" id="loadingMessage">Chargement des projets...</p>
-    <ul id="pages-list"></ul>
+    <div id="github-section">
+      <h2>Projets GitHub</h2>
+      <ul id="pages-list"></ul>
+    </div>
+    <div id="external-section">
+      <h2>Autres Projets</h2>
+      <ul id="external-list"></ul>
+    </div>
   </div>
 
   <script>
@@ -110,18 +126,57 @@
     }
 
     // Fonction pour nettoyer le nom du dépôt en remplaçant les caractères spéciaux par des tirets
-    // (Les majuscules ne sont pas modifiées pour l'affichage)
     function cleanRepoName(name) {
       return name.replace(/[^a-zA-Z0-9-_]/g, '-');
     }
 
-    // Récupère la liste de tous les dépôts de l'utilisateur
+    // Fonction pour créer un élément de liste avec un lien
+    function createListItem(url, name) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.textContent = name;
+      li.appendChild(a);
+      return li;
+    }
+
+    // Fonction pour charger les URLs externes depuis url.txt
+    function loadExternalUrls() {
+      const externalList = document.getElementById('external-list');
+      
+      fetch('url.txt')
+        .then(response => {
+          if (!response.ok) throw new Error('Fichier url.txt non trouvé');
+          return response.text();
+        })
+        .then(text => {
+          const lines = text.split('\n').filter(line => line.trim() !== '');
+          
+          if (lines.length === 0) {
+            externalList.innerHTML = '<li>Aucun autre projet trouvé.</li>';
+            return;
+          }
+          
+          lines.forEach(line => {
+            const [name, url] = line.split('|').map(item => item.trim());
+            if (name && url) {
+              externalList.appendChild(createListItem(url, name));
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Erreur lors du chargement de url.txt:', error);
+          externalList.innerHTML = '<li>Aucun autre projet trouvé.</li>';
+        });
+    }
+
+    // Charger les projets GitHub
     fetch(`https://api.github.com/users/${username}/repos`)
       .then(response => response.json())
       .then(repos => {
         const listElement = document.getElementById('pages-list');
         const loadingMessage = document.getElementById('loadingMessage');
-        loadingMessage.style.display = 'none';
 
         // Filtrer les dépôts qui ont GitHub Pages activé et exclure le dépôt principal (username.github.io)
         const pagesRepos = repos.filter(repo => repo.has_pages && repo.name !== `${username}.github.io`);
@@ -153,30 +208,31 @@
           // S'il n'y a aucun dépôt valide, afficher un message
           if (validRepos.length === 0) {
             listElement.innerHTML = '<li>Aucun projet GitHub Pages trouvé.</li>';
-            return;
+          } else {
+            // Afficher chaque dépôt
+            validRepos.forEach(repo => {
+              const cleanName = cleanRepoName(repo.name);
+              const pageURL = `https://${username}.github.io/${cleanName}`;
+              listElement.appendChild(createListItem(pageURL, repo.name));
+            });
           }
 
-          // Afficher chaque dépôt
-          validRepos.forEach(repo => {
-            const cleanName = cleanRepoName(repo.name);
-            const pageURL = `https://${username}.github.io/${cleanName}`;
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = pageURL;
-            a.target = '_blank';
-            a.textContent = repo.name;
-            li.appendChild(a);
-            listElement.appendChild(li);
-          });
+          // Charger les URLs externes
+          loadExternalUrls();
+          loadingMessage.style.display = 'none';
         })
         .catch(error => {
           console.error('Erreur globale lors de la vérification des dépôts :', error);
-          listElement.innerHTML = '<li>Erreur lors du chargement des projets.</li>';
+          listElement.innerHTML = '<li>Erreur lors du chargement des projets GitHub.</li>';
+          loadExternalUrls();
+          loadingMessage.style.display = 'none';
         });
       })
       .catch(error => {
         console.error('Erreur lors de la récupération des dépôts :', error);
-        document.getElementById('pages-list').innerHTML = '<li>Erreur lors du chargement des projets.</li>';
+        document.getElementById('pages-list').innerHTML = '<li>Erreur lors du chargement des projets GitHub.</li>';
+        loadExternalUrls();
+        document.getElementById('loadingMessage').style.display = 'none';
       });
   </script>
 </body>
