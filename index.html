@@ -112,7 +112,12 @@
     </div>
     <div id="external-section">
       <h2>Autres Projets</h2>
-      <ul id="external-list"></ul>
+      <ul id="external-list">
+        <!-- Projet ajouté manuellement -->
+        <li>
+          <a href="https://script-three-blue.vercel.app/" target="_blank">Script pour la techno</a>
+        </li>
+      </ul>
     </div>
   </div>
 
@@ -125,12 +130,12 @@
       return repos.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
     }
 
-    // Fonction pour nettoyer le nom du dépôt en remplaçant les caractères spéciaux par des tirets
+    // Fonction pour nettoyer le nom du dépôt
     function cleanRepoName(name) {
       return name.replace(/[^a-zA-Z0-9-_]/g, '-');
     }
 
-    // Fonction pour créer un élément de liste avec un lien
+    // Fonction pour créer un élément de liste
     function createListItem(url, name) {
       const li = document.createElement('li');
       const a = document.createElement('a');
@@ -141,75 +146,33 @@
       return li;
     }
 
-    // Fonction pour charger les URLs externes depuis url.txt
-    function loadExternalUrls() {
-      const externalList = document.getElementById('external-list');
-      
-      fetch('url.txt')
-        .then(response => {
-          if (!response.ok) throw new Error('Fichier url.txt non trouvé');
-          return response.text();
-        })
-        .then(text => {
-          const lines = text.split('\n').filter(line => line.trim() !== '');
-          
-          if (lines.length === 0) {
-            externalList.innerHTML = '<li>Aucun autre projet trouvé.</li>';
-            return;
-          }
-          
-          lines.forEach(line => {
-            const [name, url] = line.split('|').map(item => item.trim());
-            if (name && url) {
-              externalList.appendChild(createListItem(url, name));
-            }
-          });
-        })
-        .catch(error => {
-          console.error('Erreur lors du chargement de url.txt:', error);
-          externalList.innerHTML = '<li>Aucun autre projet trouvé.</li>';
-        });
-    }
-
-    // Charger les projets GitHub
+    // Chargement des projets GitHub
     fetch(`https://api.github.com/users/${username}/repos`)
       .then(response => response.json())
       .then(repos => {
         const listElement = document.getElementById('pages-list');
         const loadingMessage = document.getElementById('loadingMessage');
 
-        // Filtrer les dépôts qui ont GitHub Pages activé et exclure le dépôt principal (username.github.io)
+        // Filtrer les dépôts avec GitHub Pages activés
         const pagesRepos = repos.filter(repo => repo.has_pages && repo.name !== `${username}.github.io`);
-
-        // Trier par date de dernière modification
         const sortedRepos = sortReposByDate(pagesRepos);
 
-        // Pour chaque dépôt, vérifier la présence d'un fichier index.html dans le répertoire racine
+        // Vérifier chaque dépôt
         Promise.all(sortedRepos.map(repo => {
           return fetch(`https://api.github.com/repos/${username}/${repo.name}/contents`)
-            .then(response => {
-              if (!response.ok) throw new Error('Erreur dans la récupération des contenus');
-              return response.json();
-            })
+            .then(response => response.json())
             .then(contents => {
-              // Vérifier si l'un des fichiers est "index.html"
               const hasIndex = contents.some(item => item.name === 'index.html');
               return hasIndex ? repo : null;
             })
-            .catch(error => {
-              console.error(`Erreur lors de la vérification du dépôt ${repo.name}:`, error);
-              return null;
-            });
+            .catch(() => null);
         }))
         .then(validRepos => {
-          // Ne conserver que les dépôts valides (ceux avec index.html)
           validRepos = validRepos.filter(repo => repo !== null);
 
-          // S'il n'y a aucun dépôt valide, afficher un message
           if (validRepos.length === 0) {
             listElement.innerHTML = '<li>Aucun projet GitHub Pages trouvé.</li>';
           } else {
-            // Afficher chaque dépôt
             validRepos.forEach(repo => {
               const cleanName = cleanRepoName(repo.name);
               const pageURL = `https://${username}.github.io/${cleanName}`;
@@ -217,21 +180,15 @@
             });
           }
 
-          // Charger les URLs externes
-          loadExternalUrls();
           loadingMessage.style.display = 'none';
         })
-        .catch(error => {
-          console.error('Erreur globale lors de la vérification des dépôts :', error);
+        .catch(() => {
           listElement.innerHTML = '<li>Erreur lors du chargement des projets GitHub.</li>';
-          loadExternalUrls();
           loadingMessage.style.display = 'none';
         });
       })
-      .catch(error => {
-        console.error('Erreur lors de la récupération des dépôts :', error);
+      .catch(() => {
         document.getElementById('pages-list').innerHTML = '<li>Erreur lors du chargement des projets GitHub.</li>';
-        loadExternalUrls();
         document.getElementById('loadingMessage').style.display = 'none';
       });
   </script>
